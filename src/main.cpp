@@ -4,8 +4,8 @@
 
 unsigned long sendNTPpacket(IPAddress& address);
 
-char ssid[] = "LAB804";
-char pass[] = "l4b804!@";
+char ssid[] = "__";
+char pass[] = "__";
 
 unsigned int localPort = 2390;      // local port to listen for UDP packets
 
