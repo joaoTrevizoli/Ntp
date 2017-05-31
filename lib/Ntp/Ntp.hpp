@@ -42,20 +42,21 @@ Created by: João Trevizoli Esteves
 class Ntp
 {
 public:
-  int8_t _offset;
+  int8_t _utcOffset;
   WiFiUDP* _udp;
 
-  Ntp(WiFiUDP& udp, int8_t offset=0,\
+  Ntp(WiFiUDP& udp, int8_t utcOffset=0,\
      uint32_t updateInterval=10000, \
      const uint16_t port=NTP_LOCAL_PORT);
 
   Ntp(WiFiUDP& udp, const char* server,\
-     int8_t offset=0,\
+     int8_t utcOffset=0,\
      int32_t updateInterval=10000,\
      const uint16_t port=NTP_LOCAL_PORT);
 
   bool begin();
   void getServerHost();
+  void resetUtcOffset(int8_t utcOffset);
   uint32_t secondsSince1900(bool force=false);
   uint32_t unixTimeStamp(bool force=false);
 

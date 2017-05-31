@@ -3,11 +3,11 @@
 #include "WiFiUdp.h"
 #include "Ntp.hpp"
 
-char ssid[] = "__";
-char pass[] =  "__";
+char ssid[] = "LAB804";
+char pass[] =  "l4b804!@";
 
 WiFiUDP udp;
-Ntp ntpClient(udp, 10, 500);
+Ntp ntpClient(udp, -3, 500);
 
 void setup()
 {

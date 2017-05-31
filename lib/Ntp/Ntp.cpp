@@ -14,24 +14,24 @@ Created by: João Trevizoli Esteves
 
 // -------------------------Constructors------------------------------------- //
 
-Ntp::Ntp(WiFiUDP& udp, int8_t offset, uint32_t updateInterval, \
+Ntp::Ntp(WiFiUDP& udp, int8_t utcOffset, uint32_t updateInterval, \
   const uint16_t port):
   _port(port)
 {
   this->_udp = &udp;
-  this->_offset = offset;
+  this->_utcOffset = utcOffset;
   this->_updateInterval = updateInterval;
 }
 
 // -------------------------------------------------------------------------- //
 
-Ntp::Ntp(WiFiUDP& udp, const char* server, int8_t offset,\
+Ntp::Ntp(WiFiUDP& udp, const char* server, int8_t utcOffset,\
    int32_t updateInterval, const uint16_t port):
    _server(server),
    _port(port)
 {
   this->_udp = &udp;
-  this->_offset = offset;
+  this->_utcOffset = utcOffset;
   this->_updateInterval = updateInterval;
 }
 
@@ -55,6 +55,18 @@ void Ntp::getServerHost()
   Serial.println(this->_server);
   Serial.print("Host ip: ");
   Serial.println(this->_timeServerIP);
+}
+
+// -------------------------------------------------------------------------- //
+
+void Ntp::resetUtcOffset(int8_t utcOffset)
+{
+  #if NTP_DEBUG == 1
+    Serial.print("Resetting UTC timezone utcOffset by ");
+    Serial.print(utcOffset);
+    Serial.println(" hours.");
+  #endif
+  this->_utcOffset = utcOffset;
 }
 
 // -------------------------------------------------------------------------- //
@@ -177,6 +189,7 @@ bool Ntp::updateForce()
    unsigned long highWord = word(this->_packageBuffer[40], this->_packageBuffer[41]);
    unsigned long lowWord = word(this->_packageBuffer[42], this->_packageBuffer[43]);
    this->_secondsSince1900 = highWord << 16 | lowWord;
+   this->_secondsSince1900 = this->_secondsSince1900 + (this->_utcOffset * 3600);
    return true;
 }
 // -------------------------------------------------------------------------- //
