@@ -1,13 +1,29 @@
+/*Ntp
+    __  _       _      ___   ___  _  _    __
+  / / | | __ _| |__  ( _ ) / _ \| || |   \ \
+/ /   | |/ _` | '_ \ / _ \| | | | || |_   \ \
+\ \   | | (_| | |_) | (_) | |_| |__   _|  / /
+ \_\  |_|\__,_|_.__/ \___/ \___/   |_|   /_/
+
+Implementation of the Network Time Protocol
+
+Created by: João Trevizoli Esteves
+*/
+
 #include "Ntp.hpp"
 
+// -------------------------Constructors------------------------------------- //
 
-Ntp::Ntp(WiFiUDP& udp, int8_t offset, uint32_t updateInterval, const uint16_t port):
+Ntp::Ntp(WiFiUDP& udp, int8_t offset, uint32_t updateInterval, \
+  const uint16_t port):
   _port(port)
 {
   this->_udp = &udp;
   this->_offset = offset;
   this->_updateInterval = updateInterval;
 }
+
+// -------------------------------------------------------------------------- //
 
 Ntp::Ntp(WiFiUDP& udp, const char* server, int8_t offset,\
    int32_t updateInterval, const uint16_t port):
@@ -18,6 +34,8 @@ Ntp::Ntp(WiFiUDP& udp, const char* server, int8_t offset,\
   this->_offset = offset;
   this->_updateInterval = updateInterval;
 }
+
+// -------------------------Public methods----------------------------------- //
 
 bool Ntp::begin()
 {
@@ -30,12 +48,16 @@ bool Ntp::begin()
   this->getNewHostIP();
 }
 
+// -------------------------------------------------------------------------- //
+
 void Ntp::getServerHost()
 {
   Serial.println(this->_server);
   Serial.print("Host ip: ");
   Serial.println(this->_timeServerIP);
 }
+
+// -------------------------------------------------------------------------- //
 
 uint32_t Ntp::secondsSince1900(bool force)
 {
@@ -44,6 +66,8 @@ uint32_t Ntp::secondsSince1900(bool force)
 
   return this->_secondsSince1900;
 }
+
+// -------------------------------------------------------------------------- //
 
 uint32_t Ntp::unixTimeStamp(bool force)
 {
@@ -60,19 +84,7 @@ uint32_t Ntp::unixTimeStamp(bool force)
   }
 }
 
-
-void Ntp::formatPackage()
-{
-  memset(this->_packageBuffer, 0, NTP_PACKAGE_SIZE);
-  this->_packageBuffer[0] = (LI << 3 | NTP_VERSION) << 3 | NTP_PACKET_MODE;
-  this->_packageBuffer[1] = STRATUM_0;
-  this->_packageBuffer[2] = NTP_POOL;
-  this->_packageBuffer[3] = PEER_CLOCK_PRECISION;
-  this->_packageBuffer[12]  = 49;
-  this->_packageBuffer[13]  = 0x4E;
-  this->_packageBuffer[14]  = 49;
-  this->_packageBuffer[15]  = 52;
-}
+// -------------------------Private methods---------------------------------- //
 
 bool Ntp::getNewHostIP()
 {
@@ -98,6 +110,23 @@ bool Ntp::getNewHostIP()
    }
 }
 
+// -------------------------------------------------------------------------- //
+
+void Ntp::formatPackage()
+{
+  memset(this->_packageBuffer, 0, NTP_PACKAGE_SIZE);
+  this->_packageBuffer[0] = (LI << 3 | NTP_VERSION) << 3 | NTP_PACKET_MODE;
+  this->_packageBuffer[1] = STRATUM_0;
+  this->_packageBuffer[2] = NTP_POOL;
+  this->_packageBuffer[3] = PEER_CLOCK_PRECISION;
+  this->_packageBuffer[12]  = 49;
+  this->_packageBuffer[13]  = 0x4E;
+  this->_packageBuffer[14]  = 49;
+  this->_packageBuffer[15]  = 52;
+}
+
+// -------------------------------------------------------------------------- //
+
 bool Ntp::sendNTPpackage()
 {
   this->formatPackage();
@@ -105,11 +134,27 @@ bool Ntp::sendNTPpackage()
   #if NTP_DEBUG == 1
     Serial.println("sending NTP packet...");
   #endif
-  // Serial.println(this->_timeServerIP);
   this->_udp->beginPacket(this->_timeServerIP, NTP_HOST_PORT);
   this->_udp->write(this->_packageBuffer, NTP_PACKAGE_SIZE);
   this->_udp->endPacket();
 }
+
+// -------------------------------------------------------------------------- //
+
+bool Ntp::update()
+{
+  if ((millis() - this->_lastUpdate >= this->_updateInterval) \
+  || this->_lastUpdate == 0
+  || this->_secondsSince1900 == 0)
+  {
+    this->getNewHostIP();
+    this->_lastUpdate = millis();
+    return this->updateForce();
+  }
+  return true;
+}
+
+// -------------------------------------------------------------------------- //
 
 bool Ntp::updateForce()
 {
@@ -134,16 +179,4 @@ bool Ntp::updateForce()
    this->_secondsSince1900 = highWord << 16 | lowWord;
    return true;
 }
-
-bool Ntp::update()
-{
-  if ((millis() - this->_lastUpdate >= this->_updateInterval) \
-  || this->_lastUpdate == 0
-  || this->_secondsSince1900 == 0)
-  {
-    this->getNewHostIP();
-    this->_lastUpdate = millis();
-    return this->updateForce();
-  }
-  return true;
-}
+// -------------------------------------------------------------------------- //

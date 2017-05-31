@@ -1,3 +1,15 @@
+/*Ntp
+    __  _       _      ___   ___  _  _    __
+  / / | | __ _| |__  ( _ ) / _ \| || |   \ \
+/ /   | |/ _` | '_ \ / _ \| | | | || |_   \ \
+\ \   | | (_| | |_) | (_) | |_| |__   _|  / /
+ \_\  |_|\__,_|_.__/ \___/ \___/   |_|   /_/
+
+Interface of the Network Time Protocol
+
+Created by: João Trevizoli Esteves
+*/
+
 #ifndef NTP_HPP
 #define  NTP_HPP
 
@@ -9,7 +21,8 @@
 
 #define SEVENTY_YEARS 2208988800UL
 
-// NTP header
+// -------------------------NTP packet config ------------------------------- //
+
 #define SERVER_POOL_URL "br.pool.ntp.org"
 #define NTP_PACKAGE_SIZE 48
 #define NTP_LOCAL_PORT 2390
@@ -23,6 +36,8 @@
 #define STRATUM_3 3
 #define NTP_POOL 6
 #define PEER_CLOCK_PRECISION 0XEC
+
+// -------------------------Class Interface---------------------------------- //
 
 class Ntp
 {
@@ -41,9 +56,9 @@ public:
 
   bool begin();
   void getServerHost();
-
   uint32_t secondsSince1900(bool force=false);
   uint32_t unixTimeStamp(bool force=false);
+
 
 private:
 
